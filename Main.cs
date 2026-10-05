@@ -1,10 +1,11 @@
 using System;
 using System.Globalization;
 using MelonLoader;
+using SchoolChange.Patches;
 using UnityEngine;
 using UnityEngine.AI;
 
-[assembly: MelonInfo(typeof(SchoolChange.SchoolChangeMod), "SchoolChange", "1.0.0", "Op")]
+[assembly: MelonInfo(typeof(SchoolChange.SchoolChangeMod), "SchoolChange", "1.0.2", "Op")]
 [assembly: MelonGame(null, null)]
 
 namespace SchoolChange
@@ -35,14 +36,16 @@ namespace SchoolChange
 
         private string _playerHeight = "0";
 
-        // активные оверрайды — если null, поле не применялось
         private float? _momOvSpeed, _momOvAccel, _momOvAngular;
         private float? _dadOvSpeed, _dadOvAccel, _dadOvAngular;
-        private float? _playerOvHeight;
+
+        private HarmonyLib.Harmony _harmony;
 
         public override void OnInitializeMelon()
         {
             LoggerInstance.Msg("SchoolChange loaded. F2 to toggle.");
+            _harmony = new HarmonyLib.Harmony("SchoolChange.Patches");
+            _harmony.PatchAll();
         }
 
         public override void OnUpdate()
@@ -52,7 +55,6 @@ namespace SchoolChange
 
         public override void OnLateUpdate()
         {
-            // после всех Update игры возвращаем наши значения
             if (_momOvSpeed.HasValue || _momOvAccel.HasValue || _momOvAngular.HasValue)
             {
                 if (_momAgent == null) EnsureTargets();
@@ -73,12 +75,6 @@ namespace SchoolChange
                     if (_dadOvAccel.HasValue)   _dadAgent.acceleration = _dadOvAccel.Value;
                     if (_dadOvAngular.HasValue) _dadAgent.angularSpeed = _dadOvAngular.Value;
                 }
-            }
-
-            if (_playerOvHeight.HasValue)
-            {
-                if (_playerCC == null) EnsureTargets();
-                if (_playerCC != null) _playerCC.height = _playerOvHeight.Value;
             }
         }
 
@@ -142,7 +138,8 @@ namespace SchoolChange
             {
                 if (float.TryParse(_playerHeight, NumberStyles.Float, CultureInfo.InvariantCulture, out float v))
                 {
-                    _playerOvHeight = v;
+                    CharacterControllerHeightPatch.Target   = _playerCC;
+                    CharacterControllerHeightPatch.Override = v;
                     _playerCC.height = v;
                 }
             }
@@ -267,6 +264,9 @@ namespace SchoolChange
             }
 
             _playerCC = UnityEngine.Object.FindObjectOfType<CharacterController>();
+
+            if (_playerCC != null && CharacterControllerHeightPatch.Override.HasValue)
+                CharacterControllerHeightPatch.Target = _playerCC;
         }
     }
 }
