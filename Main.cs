@@ -16,7 +16,7 @@ namespace SchoolChange
         private bool _open;
         private int  _tab;
 
-        private Rect _mainRect   = new Rect(120f, 120f, 260f, 200f);
+        private Rect _mainRect   = new Rect(120f, 120f, 260f, 180f);
         private Rect _playerRect = new Rect(400f, 120f, 320f, 170f);
         private Rect _momRect    = new Rect(400f, 310f, 320f, 240f);
         private Rect _dadRect    = new Rect(400f, 570f, 320f, 240f);
@@ -35,6 +35,11 @@ namespace SchoolChange
 
         private string _playerHeight = "0";
 
+        // активные оверрайды — если null, поле не применялось
+        private float? _momOvSpeed, _momOvAccel, _momOvAngular;
+        private float? _dadOvSpeed, _dadOvAccel, _dadOvAngular;
+        private float? _playerOvHeight;
+
         public override void OnInitializeMelon()
         {
             LoggerInstance.Msg("SchoolChange loaded. F2 to toggle.");
@@ -45,11 +50,43 @@ namespace SchoolChange
             if (Input.GetKeyDown(ToggleKey)) _open = !_open;
         }
 
+        public override void OnLateUpdate()
+        {
+            // после всех Update игры возвращаем наши значения
+            if (_momOvSpeed.HasValue || _momOvAccel.HasValue || _momOvAngular.HasValue)
+            {
+                if (_momAgent == null) EnsureTargets();
+                if (_momAgent != null)
+                {
+                    if (_momOvSpeed.HasValue)   _momAgent.speed        = _momOvSpeed.Value;
+                    if (_momOvAccel.HasValue)   _momAgent.acceleration = _momOvAccel.Value;
+                    if (_momOvAngular.HasValue) _momAgent.angularSpeed = _momOvAngular.Value;
+                }
+            }
+
+            if (_dadOvSpeed.HasValue || _dadOvAccel.HasValue || _dadOvAngular.HasValue)
+            {
+                if (_dadAgent == null) EnsureTargets();
+                if (_dadAgent != null)
+                {
+                    if (_dadOvSpeed.HasValue)   _dadAgent.speed        = _dadOvSpeed.Value;
+                    if (_dadOvAccel.HasValue)   _dadAgent.acceleration = _dadOvAccel.Value;
+                    if (_dadOvAngular.HasValue) _dadAgent.angularSpeed = _dadOvAngular.Value;
+                }
+            }
+
+            if (_playerOvHeight.HasValue)
+            {
+                if (_playerCC == null) EnsureTargets();
+                if (_playerCC != null) _playerCC.height = _playerOvHeight.Value;
+            }
+        }
+
         public override void OnGUI()
         {
             if (!_open) return;
 
-            _mainRect = GUI.Window(0x5C01, _mainRect, DrawMainWindow, "SchoolChange — Cheat Menu");
+            _mainRect = GUI.Window(0x5C01, _mainRect, DrawMainWindow, "SchoolChange");
 
             if (_tab == 1) _playerRect = GUI.Window(0x5C02, _playerRect, DrawPlayerTab, "Player Manager");
             if (_tab == 2) _momRect    = GUI.Window(0x5C03, _momRect,    DrawMomTab,    "Mom Manager");
@@ -80,10 +117,6 @@ namespace SchoolChange
                 _tab = 3;
             }
 
-            GUILayout.Space(4f);
-            if (GUILayout.Button("Refresh targets"))
-                EnsureTargets();
-
             GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
         }
 
@@ -108,7 +141,10 @@ namespace SchoolChange
             if (GUILayout.Button("Apply"))
             {
                 if (float.TryParse(_playerHeight, NumberStyles.Float, CultureInfo.InvariantCulture, out float v))
+                {
+                    _playerOvHeight = v;
                     _playerCC.height = v;
+                }
             }
 
             GUILayout.Space(8f);
@@ -145,9 +181,9 @@ namespace SchoolChange
             GUILayout.Space(4f);
             if (GUILayout.Button("Apply"))
             {
-                if (float.TryParse(_momSpeed,   NumberStyles.Float, CultureInfo.InvariantCulture, out float s))  _momAgent.speed        = s;
-                if (float.TryParse(_momAccel,   NumberStyles.Float, CultureInfo.InvariantCulture, out float a))  _momAgent.acceleration = a;
-                if (float.TryParse(_momAngular, NumberStyles.Float, CultureInfo.InvariantCulture, out float an)) _momAgent.angularSpeed = an;
+                if (float.TryParse(_momSpeed,   NumberStyles.Float, CultureInfo.InvariantCulture, out float s))  { _momOvSpeed   = s; _momAgent.speed        = s; }
+                if (float.TryParse(_momAccel,   NumberStyles.Float, CultureInfo.InvariantCulture, out float a))  { _momOvAccel   = a; _momAgent.acceleration = a; }
+                if (float.TryParse(_momAngular, NumberStyles.Float, CultureInfo.InvariantCulture, out float an)) { _momOvAngular = an; _momAgent.angularSpeed = an; }
             }
 
             GUILayout.Space(8f);
@@ -184,9 +220,9 @@ namespace SchoolChange
             GUILayout.Space(4f);
             if (GUILayout.Button("Apply"))
             {
-                if (float.TryParse(_dadSpeed,   NumberStyles.Float, CultureInfo.InvariantCulture, out float s))  _dadAgent.speed        = s;
-                if (float.TryParse(_dadAccel,   NumberStyles.Float, CultureInfo.InvariantCulture, out float a))  _dadAgent.acceleration = a;
-                if (float.TryParse(_dadAngular, NumberStyles.Float, CultureInfo.InvariantCulture, out float an)) _dadAgent.angularSpeed = an;
+                if (float.TryParse(_dadSpeed,   NumberStyles.Float, CultureInfo.InvariantCulture, out float s))  { _dadOvSpeed   = s; _dadAgent.speed        = s; }
+                if (float.TryParse(_dadAccel,   NumberStyles.Float, CultureInfo.InvariantCulture, out float a))  { _dadOvAccel   = a; _dadAgent.acceleration = a; }
+                if (float.TryParse(_dadAngular, NumberStyles.Float, CultureInfo.InvariantCulture, out float an)) { _dadOvAngular = an; _dadAgent.angularSpeed = an; }
             }
 
             GUILayout.Space(8f);
