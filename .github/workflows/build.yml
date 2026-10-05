@@ -34,12 +34,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SchoolChange
-          path: bin/Release/net6.0/SchoolChange.dll
+          path: bin/Release/net472/SchoolChange.dll
           if-no-files-found: error
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: bin/Release/net6.0/SchoolChange.dll
+          files: bin/Release/net472/SchoolChange.dll
           generate_release_notes: true
