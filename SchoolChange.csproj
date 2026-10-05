@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>SchoolChange</AssemblyName>
     <RootNamespace>SchoolChange</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
@@ -17,7 +17,11 @@
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
 
-    <PackageReference Include="UnityEngine.Modules" Version="2021.3.16">
+    <PackageReference Include="HarmonyX" Version="2.10.2">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
