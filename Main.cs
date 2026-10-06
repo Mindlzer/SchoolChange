@@ -5,7 +5,7 @@ using SchoolChange.Patches;
 using UnityEngine;
 using UnityEngine.AI;
 
-[assembly: MelonInfo(typeof(SchoolChange.SchoolChangeMod), "SchoolChange", "1.0.2", "Op")]
+[assembly: MelonInfo(typeof(SchoolChange.SchoolChangeMod), "SchoolChange", "1.0.2", "MindLz")]
 [assembly: MelonGame(null, null)]
 
 namespace SchoolChange
